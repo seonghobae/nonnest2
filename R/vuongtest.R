@@ -330,8 +330,7 @@ check.obj <- function(object1, object2) {
       callA <- object1@Call
       ## recommended vcov type for mirt models:
       if(object1@Options$SE.type != "Oakes") warning("SE.type='Oakes' is recommended for mirt models")
-    } 
-      if (classA %in% c("MxRAMModel" , "MxModel")){
+    } else if (classA %in% c("MxRAMModel" , "MxModel")){
       callA <- object1@name
     }
     else {
@@ -349,8 +348,7 @@ check.obj <- function(object1, object2) {
     if(classB %in% c("SingleGroupClass", "MultipleGroupClass")){
       callB <- object2@Call
       if(object2@Options$SE.type != "Oakes") warning("SE.type='Oakes' is recommended for mirt models")
-    } 
-      if (classB %in% c("MxRAMModel" , "MxModel") ){
+    } else if (classB %in% c("MxRAMModel" , "MxModel") ){
       callB <- object2@name
     }
     else {
