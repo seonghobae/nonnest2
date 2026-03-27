@@ -142,12 +142,12 @@ vuongtest <- function(object1, object2, nested=FALSE, adj="none", ll1=llcont, ll
 
   ## Adjustments to likelihood ratio
   ## FIXME lavaan equality constraints; use df instead?
-  if(classA %in% c("SingleGroupClass", "MultipleGroupClass")){
+  if(classA %in% c("SingleGroupClass", "MultipleGroupClass", "DiscreteClass")){
     nparA <- mirt::extract.mirt(object1, "nest")
   } else {
     nparA <- length(coef(object1))
   }
-  if(classB %in% c("SingleGroupClass", "MultipleGroupClass")){
+  if(classB %in% c("SingleGroupClass", "MultipleGroupClass", "DiscreteClass")){
     nparB <- mirt::extract.mirt(object2, "nest")
   } else {
     nparB <- length(coef(object2))
