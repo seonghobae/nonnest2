@@ -53,12 +53,21 @@ llcont.glm <- function(x, ...){
              if(is.matrix(y)) {
                ## Bolt: replaced apply(..., 1, sum) with optimized rowSums() for performance
                n <- rowSums(y)
-               y <- ifelse(n == 0, 0, y[, 1]/n)
+              ## Bolt: optimized ifelse with vectorized subsetting
+              res_y <- n * 0
+              cond_y <- n != 0
+              res_y[cond_y] <- y[cond_y, 1] / n[cond_y]
+              y <- res_y
              } else {
                n <- rep.int(1, length(y))
              }
              m <- if (any(n > 1)) n else wt
-             wt <- ifelse(m > 0, (wt/m), 0)
+            ## Bolt: optimized ifelse with vectorized subsetting
+            res_wt <- m * 0
+            cond_wt <- m > 0
+            wt_full <- if(length(wt) == 1) rep_len(wt, length(m)) else wt
+            res_wt[cond_wt] <- wt_full[cond_wt] / m[cond_wt]
+            wt <- res_wt
              dbinom(round(m * y), round(m), mpreds, log = TRUE) * wt
            },
            quasibinomial = {
@@ -150,14 +159,22 @@ llcont.hurdle <- function(x, ...) {
   zeroPoisson <- function(parms) {
     mu <- as.vector(exp(Z %*% parms + offsetz))
     loglik0 <- -mu
-    Y0 * weights * loglik0 + ifelse(Y1, weights * log(1 - exp(loglik0)), 0)
+    ## Bolt: optimized ifelse with vectorized subsetting
+    res <- Y1 * 0
+    w <- if(length(weights) == 1) rep_len(weights, length(Y1)) else weights
+    res[Y1] <- w[Y1] * log(1 - exp(loglik0[Y1]))
+    Y0 * weights * loglik0 + res
   }
 
   countPoisson <- function(parms) {
     mu <- Y1 * as.vector(exp(X %*% parms + offsetx))
     loglik0 <- -mu
     loglik1 <- Y1 * dpois(Y, lambda = mu, log = TRUE)
-    Y1 * weights * loglik1 - ifelse(Y1, weights * log(1 - exp(loglik0)), 0)
+    ## Bolt: optimized ifelse with vectorized subsetting
+    res <- Y1 * 0
+    w <- if(length(weights) == 1) rep_len(weights, length(Y1)) else weights
+    res[Y1] <- w[Y1] * log(1 - exp(loglik0[Y1]))
+    Y1 * weights * loglik1 - res
   }
 
   zeroNegBin <- function(parms) {
@@ -165,8 +182,11 @@ llcont.hurdle <- function(x, ...) {
     theta <- exp(parms[kz + 1])
     loglik0 <- suppressWarnings(dnbinom(0, size = theta,
                                         mu = mu, log = TRUE))
-    Y0 * weights * loglik0 +
-        ifelse(Y1, weights * log(1 - exp(loglik0)), 0)
+    ## Bolt: optimized ifelse with vectorized subsetting
+    res <- Y1 * 0
+    w <- if(length(weights) == 1) rep_len(weights, length(Y1)) else weights
+    res[Y1] <- w[Y1] * log(1 - exp(loglik0[Y1]))
+    Y0 * weights * loglik0 + res
   }
 
   countNegBin <- function(parms) {
@@ -176,7 +196,11 @@ llcont.hurdle <- function(x, ...) {
                                         mu = mu, log = TRUE))
     loglik1 <- suppressWarnings(dnbinom(Y, size = theta,
                                         mu = mu, log = TRUE))
-    ifelse(Y1, weights * loglik1 - weights * log(1 - exp(loglik0)), 0)
+    ## Bolt: optimized ifelse with vectorized subsetting
+    res <- Y1 * 0
+    w <- if(length(weights) == 1) rep_len(weights, length(Y1)) else weights
+    res[Y1] <- w[Y1] * (loglik1[Y1] - log(1 - exp(loglik0[Y1])))
+    res
     }
 
   zeroGeom <- function(parms) zeroNegBin(c(parms, 0))
