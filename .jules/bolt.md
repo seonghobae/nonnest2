@@ -12,3 +12,6 @@
 ## 2026-07-14 - Matrix Cross Product Optimization
 **Learning:** In R, matrix multiplication of the form `t(X) %*% Y` explicitly allocates memory for the transposed matrix. Using the optimized base function `crossprod(X, Y)` avoids this allocation.
 **Action:** Always replace `t(X) %*% Y` with `crossprod(X, Y)` for faster and more memory-efficient cross-product calculations.
+## 2024-08-02 - Vectorized Subsetting Scalar Bug in R
+**Learning:** R's logical index subsetting (e.g., `res[Y1] <- weights[Y1] * ...`) does NOT automatically recycle scalar values to match the condition length. Subsetting a length-1 scalar with a logical vector containing multiple `TRUE`s yields a vector of `NA`s, breaking execution and returning `NA`s silently.
+**Action:** When replacing `ifelse()` with preallocated vectorized subsetting, always explicitly handle scalar variables (like `weights`) by recycling them first: `w_safe <- if(length(weights) == 1) rep_len(weights, length(Y1)) else weights`.
