@@ -65,7 +65,7 @@
 #' @export
 icci <- function(object1, object2, conf.level=.95, ll1=llcont, ll2=llcont) {
 
-  if (!is.numeric(conf.level) || length(conf.level) != 1 || conf.level <= 0 || conf.level >= 1) {
+  if (!is.numeric(conf.level) || length(conf.level) != 1 || is.na(conf.level) || conf.level <= 0 || conf.level >= 1) {
     stop("conf.level must be a numeric scalar between 0 and 1", call. = FALSE)
   }
 
