@@ -16,3 +16,7 @@
 ## 2024-08-05 - Avoid ifelse for expensive operations in R
 **Learning:** In R, `ifelse()` evaluates both true and false branches entirely before subsetting, which is inefficient for expensive operations and can cause mathematical hazards (e.g. `log(0)`).
 **Action:** Optimize this overhead by replacing `ifelse()` with preallocation that preserves attributes (e.g., `res <- Y * 0`) and vectorized subsetting.
+
+## 2024-08-05 - Rejected R-only Optimization for Statistical Likelihoods
+**Learning:** Replacing `ifelse` with indexed assignment in active statistical likelihood arithmetic requires numerical and scientific evidence. `ifelse` propagates `NA`, while `if (any(Y1))` can error on `NA`. Mathematical layers require a documented Rust f64 kernel with bounded CPU multithreading and GPU path, while one simple R implementation remains an independent parity oracle.
+**Action:** Avoid R-only optimizations in statistical likelihood layers. Propose a clean Rust/R vertical slice covering stable `log1mexp`, explicit semantics, true-parameter simulations, parity tests, benchmark, 100% coverage, CHANGELOG, ADR, and documentation instead.
