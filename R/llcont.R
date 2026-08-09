@@ -150,14 +150,28 @@ llcont.hurdle <- function(x, ...) {
   zeroPoisson <- function(parms) {
     mu <- as.vector(exp(Z %*% parms + offsetz))
     loglik0 <- -mu
-    Y0 * weights * loglik0 + ifelse(Y1, weights * log(1 - exp(loglik0)), 0)
+    res <- Y0 * weights * loglik0
+    if (any(Y1, na.rm = TRUE)) {
+        cond <- as.logical(Y1)
+        cond[is.na(cond)] <- FALSE
+        weights_cond <- if(length(weights) == 1) rep_len(weights, length(cond))[cond] else weights[cond]
+        res[cond] <- res[cond] + weights_cond * log(1 - exp(loglik0[cond]))
+    }
+    res
   }
 
   countPoisson <- function(parms) {
     mu <- Y1 * as.vector(exp(X %*% parms + offsetx))
     loglik0 <- -mu
     loglik1 <- Y1 * dpois(Y, lambda = mu, log = TRUE)
-    Y1 * weights * loglik1 - ifelse(Y1, weights * log(1 - exp(loglik0)), 0)
+    res <- Y1 * weights * loglik1
+    if (any(Y1, na.rm = TRUE)) {
+        cond <- as.logical(Y1)
+        cond[is.na(cond)] <- FALSE
+        weights_cond <- if(length(weights) == 1) rep_len(weights, length(cond))[cond] else weights[cond]
+        res[cond] <- res[cond] - weights_cond * log(1 - exp(loglik0[cond]))
+    }
+    res
   }
 
   zeroNegBin <- function(parms) {
@@ -165,8 +179,14 @@ llcont.hurdle <- function(x, ...) {
     theta <- exp(parms[kz + 1])
     loglik0 <- suppressWarnings(dnbinom(0, size = theta,
                                         mu = mu, log = TRUE))
-    Y0 * weights * loglik0 +
-        ifelse(Y1, weights * log(1 - exp(loglik0)), 0)
+    res <- Y0 * weights * loglik0
+    if (any(Y1, na.rm = TRUE)) {
+        cond <- as.logical(Y1)
+        cond[is.na(cond)] <- FALSE
+        weights_cond <- if(length(weights) == 1) rep_len(weights, length(cond))[cond] else weights[cond]
+        res[cond] <- res[cond] + weights_cond * log(1 - exp(loglik0[cond]))
+    }
+    res
   }
 
   countNegBin <- function(parms) {
@@ -176,7 +196,14 @@ llcont.hurdle <- function(x, ...) {
                                         mu = mu, log = TRUE))
     loglik1 <- suppressWarnings(dnbinom(Y, size = theta,
                                         mu = mu, log = TRUE))
-    ifelse(Y1, weights * loglik1 - weights * log(1 - exp(loglik0)), 0)
+    res <- Y1 * 0 # preserve attributes and length
+    if (any(Y1, na.rm = TRUE)) {
+        cond <- as.logical(Y1)
+        cond[is.na(cond)] <- FALSE
+        weights_cond <- if(length(weights) == 1) rep_len(weights, length(cond))[cond] else weights[cond]
+        res[cond] <- weights_cond * loglik1[cond] - weights_cond * log(1 - exp(loglik0[cond]))
+    }
+    res
     }
 
   zeroGeom <- function(parms) zeroNegBin(c(parms, 0))
