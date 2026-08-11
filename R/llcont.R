@@ -154,7 +154,7 @@ llcont.hurdle <- function(x, ...) {
     res_Y1 <- Y1 * 0
     cond <- Y1; cond[is.na(cond)] <- FALSE
     if (any(cond)) {
-      w_c <- if (length(weights) == 1) rep_len(weights, length(cond))[cond] else weights[cond]
+      w_c <- if (length(weights) == 1) rep_len(weights, sum(cond)) else weights[cond]
       res_Y1[cond] <- w_c * log(1 - exp(loglik0[cond]))
     }
     Y0 * weights * loglik0 + res_Y1
@@ -168,7 +168,7 @@ llcont.hurdle <- function(x, ...) {
     res_Y1 <- Y1 * 0
     cond <- Y1; cond[is.na(cond)] <- FALSE
     if (any(cond)) {
-      w_c <- if (length(weights) == 1) rep_len(weights, length(cond))[cond] else weights[cond]
+      w_c <- if (length(weights) == 1) rep_len(weights, sum(cond)) else weights[cond]
       res_Y1[cond] <- w_c * log(1 - exp(loglik0[cond]))
     }
     Y1 * weights * loglik1 - res_Y1
@@ -183,7 +183,7 @@ llcont.hurdle <- function(x, ...) {
     res_Y1 <- Y1 * 0
     cond <- Y1; cond[is.na(cond)] <- FALSE
     if (any(cond)) {
-      w_c <- if (length(weights) == 1) rep_len(weights, length(cond))[cond] else weights[cond]
+      w_c <- if (length(weights) == 1) rep_len(weights, sum(cond)) else weights[cond]
       res_Y1[cond] <- w_c * log(1 - exp(loglik0[cond]))
     }
     Y0 * weights * loglik0 + res_Y1
@@ -200,7 +200,7 @@ llcont.hurdle <- function(x, ...) {
     res_Y1 <- Y1 * 0
     cond <- Y1; cond[is.na(cond)] <- FALSE
     if (any(cond)) {
-      w_c <- if (length(weights) == 1) rep_len(weights, length(cond))[cond] else weights[cond]
+      w_c <- if (length(weights) == 1) rep_len(weights, sum(cond)) else weights[cond]
       res_Y1[cond] <- w_c * loglik1[cond] - w_c * log(1 - exp(loglik0[cond]))
     }
     res_Y1
