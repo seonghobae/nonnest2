@@ -1,79 +1,133 @@
-test_that("hurdle ifelse optimization correctness", {
-  # Isolating the logic to compare unoptimized (ifelse) vs optimized
-  # zeroPoisson
-  run_zeroPoisson <- function(Z, parms, offsetz, weights, Y0, Y1) {
+reference_hurdle_llcont <- function(x) {
+  X <- model.matrix(x, model = "count")
+  Z <- model.matrix(x, model = "zero")
+  Y <- x$y
+  n <- length(Y)
+  kx <- NCOL(X)
+  kz <- NCOL(Z)
+  Y0 <- Y <= 0
+  Y1 <- Y > 0
+  weights <- if (is.null(w <- weights(x))) rep.int(1L, n) else w
+  offsetx <- if (is.null(x$offset$count)) rep.int(0, n) else x$offset$count
+  offsetz <- if (is.null(x$offset$zero)) rep.int(0, n) else x$offset$zero
+
+  zero_poisson <- function(parms) {
     mu <- as.vector(exp(Z %*% parms + offsetz))
     loglik0 <- -mu
-    orig <- Y0 * weights * loglik0 + ifelse(Y1, weights * log(1 - exp(loglik0)), 0)
-
-    res_Y1 <- Y1 * 0
-    cond <- Y1; cond[is.na(cond)] <- FALSE
-    if (any(cond)) {
-      w_c <- if (length(weights) == 1) rep_len(weights, length(cond))[cond] else weights[cond]
-      res_Y1[cond] <- w_c * log(1 - exp(loglik0[cond]))
-    }
-    opt <- Y0 * weights * loglik0 + res_Y1
-
-    expect_equal(orig, opt)
+    Y0 * weights * loglik0 +
+      ifelse(Y1, weights * log(1 - exp(loglik0)), 0)
   }
-
-  # countPoisson
-  run_countPoisson <- function(X, parms, offsetx, weights, Y1, Y) {
+  count_poisson <- function(parms) {
     mu <- Y1 * as.vector(exp(X %*% parms + offsetx))
     loglik0 <- -mu
     loglik1 <- Y1 * dpois(Y, lambda = mu, log = TRUE)
-    orig <- Y1 * weights * loglik1 - ifelse(Y1, weights * log(1 - exp(loglik0)), 0)
-
-    res_Y1 <- Y1 * 0
-    cond <- Y1; cond[is.na(cond)] <- FALSE
-    if (any(cond)) {
-      w_c <- if (length(weights) == 1) rep_len(weights, length(cond))[cond] else weights[cond]
-      res_Y1[cond] <- w_c * log(1 - exp(loglik0[cond]))
-    }
-    opt <- Y1 * weights * loglik1 - res_Y1
-
-    expect_equal(orig, opt)
+    Y1 * weights * loglik1 -
+      ifelse(Y1, weights * log(1 - exp(loglik0)), 0)
+  }
+  zero_negbin <- function(parms) {
+    mu <- as.vector(exp(Z %*% parms[seq_len(kz)] + offsetz))
+    theta <- exp(parms[kz + 1L])
+    loglik0 <- suppressWarnings(
+      dnbinom(0, size = theta, mu = mu, log = TRUE)
+    )
+    Y0 * weights * loglik0 +
+      ifelse(Y1, weights * log(1 - exp(loglik0)), 0)
+  }
+  count_negbin <- function(parms) {
+    mu <- as.vector(exp(X %*% parms[seq_len(kx)] + offsetx))
+    theta <- exp(parms[kx + 1L])
+    loglik0 <- suppressWarnings(
+      dnbinom(0, size = theta, mu = mu, log = TRUE)
+    )
+    loglik1 <- suppressWarnings(
+      dnbinom(Y, size = theta, mu = mu, log = TRUE)
+    )
+    ifelse(
+      Y1,
+      weights * loglik1 - weights * log(1 - exp(loglik0)),
+      0
+    )
+  }
+  zero_binomial <- function(parms) {
+    mu <- as.vector(x$linkinv(Z %*% parms + offsetz))
+    Y0 * weights * log(1 - mu) + Y1 * weights * log(mu)
   }
 
-  # test cases setup
-  n <- 100
-  Z <- matrix(rnorm(n*2), n, 2)
-  X <- matrix(rnorm(n*2), n, 2)
-  parms <- c(0.5, -0.5)
-  offsetx <- rep(0, n)
-  offsetz <- rep(0, n)
+  zero_geometric <- function(parms) zero_negbin(c(parms, 0))
+  count_geometric <- function(parms) count_negbin(c(parms, 0))
+  count_dist <- switch(
+    x$dist$count,
+    poisson = count_poisson,
+    geometric = count_geometric,
+    negbin = count_negbin
+  )
+  zero_dist <- switch(
+    x$dist$zero,
+    poisson = zero_poisson,
+    geometric = zero_geometric,
+    negbin = zero_negbin,
+    binomial = zero_binomial
+  )
 
-  # Case 1: mixed
-  Y <- rpois(n, 1.5)
-  Y0 <- Y <= 0
-  Y1 <- Y > 0
-  weights <- 1
-  run_zeroPoisson(Z, parms, offsetz, weights, Y0, Y1)
-  run_countPoisson(X, parms, offsetx, weights, Y1, Y)
+  if (x$separate) {
+    count_dist(c(
+      x$coefficients$count,
+      if (x$dist$count == "negbin") log(x$theta["count"]) else NULL
+    )) + zero_dist(c(
+      x$coefficients$zero,
+      if (x$dist$zero == "negbin") log(x$theta["zero"]) else NULL
+    ))
+  } else {
+    parms <- c(
+      x$coefficients$count,
+      if (x$dist$count == "negbin") log(x$theta["count"]) else NULL,
+      x$coefficients$zero,
+      if (x$dist$zero == "negbin") log(x$theta["zero"]) else NULL
+    )
+    count_end <- kx + (x$dist$count == "negbin")
+    zero_end <- count_end + kz + (x$dist$zero == "negbin")
+    count_dist(parms[seq_len(count_end)]) +
+      zero_dist(parms[(count_end + 1L):zero_end])
+  }
+}
 
-  # Case 2: all zeros
-  Y <- rep(0, n)
-  Y0 <- Y <= 0
-  Y1 <- Y > 0
-  run_zeroPoisson(Z, parms, offsetz, weights, Y0, Y1)
-  run_countPoisson(X, parms, offsetx, weights, Y1, Y)
+expect_hurdle_vector_matches_reference <- function(fit) {
+  expected <- reference_hurdle_llcont(fit)
+  actual <- llcont(fit)
 
-  # Case 3: all pos
-  Y <- rep(2, n)
-  Y0 <- Y <= 0
-  Y1 <- Y > 0
-  run_zeroPoisson(Z, parms, offsetz, weights, Y0, Y1)
-  run_countPoisson(X, parms, offsetx, weights, Y1, Y)
+  expect_identical(length(actual), length(expected))
+  expect_identical(attributes(actual), attributes(expected))
+  expect_equal(actual, expected, tolerance = 1e-12)
+}
 
-  # Case 4: NAs
-  Y <- c(rpois(n-10, 1.5), rep(NA, 10))
-  Y0 <- Y <= 0
-  Y1 <- Y > 0
-  run_zeroPoisson(Z, parms, offsetz, weights, Y0, Y1)
-  run_countPoisson(X, parms, offsetx, weights, Y1, Y)
+test_that("hurdle likelihood optimization preserves every observation", {
+  with_test_packages("pscl", {
+    poisson_fit <- hurdle(
+      art ~ fem + ment | fem + ment,
+      data = bioChemists,
+      dist = "poisson",
+      zero.dist = "poisson",
+      model = TRUE
+    )
+    negbin_fit <- hurdle(
+      art ~ fem + ment | fem + ment,
+      data = bioChemists,
+      dist = "negbin",
+      zero.dist = "negbin",
+      model = TRUE
+    )
 
-  # Case 5: per obs weights
-  weights <- runif(n)
-  run_zeroPoisson(Z, parms, offsetz, weights, Y0, Y1)
-  run_countPoisson(X, parms, offsetx, weights, Y1, Y)
+    scalar_weight_fit <- poisson_fit
+    scalar_weight_fit$weights <- 2
+    expect_hurdle_vector_matches_reference(scalar_weight_fit)
+
+    observation_weight_fit <- negbin_fit
+    observation_weight_fit$weights <- seq_len(length(negbin_fit$y)) /
+      length(negbin_fit$y)
+    expect_hurdle_vector_matches_reference(observation_weight_fit)
+
+    missing_outcome_fit <- poisson_fit
+    missing_outcome_fit$y[c(2, 5)] <- NA_real_
+    expect_hurdle_vector_matches_reference(missing_outcome_fit)
+  })
 })
