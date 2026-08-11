@@ -116,6 +116,23 @@ test_that("hurdle likelihood optimization preserves every observation", {
       zero.dist = "negbin",
       model = TRUE
     )
+    poisson_negbin_fit <- hurdle(
+      art ~ fem + ment | fem + ment,
+      data = bioChemists,
+      dist = "poisson",
+      zero.dist = "negbin",
+      model = TRUE
+    )
+    negbin_poisson_fit <- hurdle(
+      art ~ fem + ment | fem + ment,
+      data = bioChemists,
+      dist = "negbin",
+      zero.dist = "poisson",
+      model = TRUE
+    )
+
+    expect_hurdle_vector_matches_reference(poisson_negbin_fit)
+    expect_hurdle_vector_matches_reference(negbin_poisson_fit)
 
     scalar_weight_fit <- poisson_fit
     scalar_weight_fit$weights <- 2
@@ -125,6 +142,19 @@ test_that("hurdle likelihood optimization preserves every observation", {
     observation_weight_fit$weights <- seq_len(length(negbin_fit$y)) /
       length(negbin_fit$y)
     expect_hurdle_vector_matches_reference(observation_weight_fit)
+
+    offset_fit <- poisson_fit
+    offset_fit$offset$count <- seq(-0.15, 0.15, length.out = length(offset_fit$y))
+    offset_fit$offset$zero <- seq(0.1, -0.1, length.out = length(offset_fit$y))
+    expect_hurdle_vector_matches_reference(offset_fit)
+
+    all_zero_fit <- poisson_fit
+    all_zero_fit$y[] <- 0
+    expect_hurdle_vector_matches_reference(all_zero_fit)
+
+    all_positive_fit <- negbin_fit
+    all_positive_fit$y[] <- pmax(1, all_positive_fit$y)
+    expect_hurdle_vector_matches_reference(all_positive_fit)
 
     missing_outcome_fit <- poisson_fit
     missing_outcome_fit$y[c(2, 5)] <- NA_real_
