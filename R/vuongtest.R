@@ -98,6 +98,11 @@
 #' @export
 vuongtest <- function(object1, object2, nested=FALSE, adj="none", ll1=llcont, ll2=llcont, score1=NULL, score2=NULL, vc1=vcov, vc2=vcov) {
 
+  if (length(nested) > 1 || !is.logical(nested)) {
+    stop("Argument 'nested' must be a single logical value.", call. = FALSE)
+  }
+  adj <- match.arg(adj, c("none", "aic", "bic"))
+
   ## check objects, issue warnings/errors, get classes/calls
   obinfo <- check.obj(object1, object2)
   callA <- obinfo$callA; classA <- obinfo$classA
