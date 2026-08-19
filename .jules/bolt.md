@@ -15,3 +15,6 @@
 ## 2024-05-15 - [R Performance: ifelse Overhead]
 **Learning:** In R, ifelse evaluates both true and false branches entirely before subsetting, which is very inefficient for vector operations.
 **Action:** Optimize this by preallocating with res <- Y * 0 to preserve attributes and using vectorized subsetting like if any cond res subset <- ...
+## 2024-11-20 - Optimize sapply overhead on lists with vapply
+**Learning:** In R, `sapply()` involves significant overhead when inferring and simplifying the return type of a list operation. For large lists, this type-checking overhead is non-trivial.
+**Action:** When the exact return type and structure of the list operation is known, replace `sapply(..., FUN)` with the optimized and type-safe `vapply(..., FUN, FUN.VALUE)`. For example, use `vapply(list, nrow, numeric(1))` instead of `sapply(list, nrow)` to enforce the return type and improve performance safely.
