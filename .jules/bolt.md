@@ -15,3 +15,6 @@
 ## 2024-05-15 - [R Performance: ifelse Overhead]
 **Learning:** In R, ifelse evaluates both true and false branches entirely before subsetting, which is very inefficient for vector operations.
 **Action:** Optimize this by preallocating with res <- Y * 0 to preserve attributes and using vectorized subsetting like if any cond res subset <- ...
+## 2024-05-15 - R Performance: ifelse Overhead in nested subsets
+**Learning:** In R, `ifelse()` evaluates both true and false branches entirely before subsetting, which is inefficient. By preallocating with `res <- Y * 0` (to preserve attributes) and using vectorized subsetting, we eliminate this overhead.
+**Action:** Replace `ifelse()` with preallocation that preserves attributes (e.g., `res <- Y * 0` instead of `numeric(n)`) and vectorized subsetting (e.g., `if (any(cond)) res[cond] <- ...`) to optimize performance in frequently evaluated loops or operations.
