@@ -103,6 +103,9 @@ vuongtest <- function(object1, object2, nested=FALSE, adj="none", ll1=llcont, ll
   if (!is.character(adj) || length(adj) != 1 || is.na(adj)) {
     stop("adj must be a single character string", call. = FALSE)
   }
+  if (!adj %in% c("none", "aic", "bic")) {
+    stop('adj must be one of "none", "aic", or "bic"', call. = FALSE)
+  }
 
   ## check objects, issue warnings/errors, get classes/calls
   obinfo <- check.obj(object1, object2)
