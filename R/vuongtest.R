@@ -100,11 +100,8 @@ vuongtest <- function(object1, object2, nested=FALSE, adj="none", ll1=llcont, ll
   if (!is.logical(nested) || length(nested) != 1 || is.na(nested)) {
     stop("nested must be a single logical value", call. = FALSE)
   }
-  if (!is.character(adj) || length(adj) != 1 || is.na(adj)) {
-    stop("adj must be a single character string", call. = FALSE)
-  }
-  if (!adj %in% c("none", "aic", "bic")) {
-    stop('adj must be one of "none", "aic", or "bic"', call. = FALSE)
+  if (!is.character(adj) || length(adj) != 1 || is.na(adj) || !(adj %in% c("none", "aic", "bic"))) {
+    stop("adj must be one of \"none\", \"aic\", or \"bic\"", call. = FALSE)
   }
 
   ## check objects, issue warnings/errors, get classes/calls
