@@ -15,3 +15,7 @@
 ## 2024-05-15 - [R Performance: ifelse Overhead]
 **Learning:** In R, ifelse evaluates both true and false branches entirely before subsetting, which is very inefficient for vector operations.
 **Action:** Optimize this by preallocating with res <- Y * 0 to preserve attributes and using vectorized subsetting like if any cond res subset <- ...
+
+## 2024-05-14 - Patch formatting and `ifelse` subsetting safety
+**Learning:** When using `replace_with_git_merge_diff` to add lines with comments, the diff block must strictly mirror the original context lines. Simply injecting a line like `## Bolt: replaced apply...` into what otherwise looks like unmodified `SEARCH` block context will cause patch application to fail, because standard `patch` tools expect precise context matching. Additionally, when optimizing `ifelse(cond, true_val, false_val)` in R, using `res[which(cond)] <- ...` is not only slightly faster than `res[cond & !is.na(cond)] <- ...` but also inherently safer, as it idiomatically omits `NA` indices without raising 'NAs are not allowed' errors.
+**Action:** Always ensure that any new comments or modifications intended for the file are placed correctly within the `REPLACE` block and not hallucinated as unmodified context in the `SEARCH` block. When replacing `ifelse` with subsetting where the condition might contain `NA`, prefer `which(cond)` to safely isolate the indices.
