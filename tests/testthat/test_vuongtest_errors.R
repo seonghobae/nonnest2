@@ -77,6 +77,25 @@ test_that("vuongtest rejects invalid control arguments before object inspection"
   }
 })
 
+test_that("nested vuongtest ignores adj exactly as documented", {
+  dat <- data.frame(
+    y = c(1.1, 2.0, 2.8, 4.2, 5.1, 5.9, 7.3, 8.2, 9.1, 10.4),
+    x = 1:10,
+    z = c(0, 1, 0, 1, 0, 1, 0, 1, 0, 1)
+  )
+  reduced <- lm(y ~ x, data = dat)
+  full <- lm(y ~ x + z, data = dat)
+
+  baseline <- vuongtest(reduced, full, nested = TRUE, adj = "none")
+  supported_placeholder <- vuongtest(reduced, full, nested = TRUE, adj = "aic")
+  unsupported_placeholder <- vuongtest(reduced, full, nested = TRUE, adj = "ignored-placeholder")
+
+  expect_equal(supported_placeholder$LRTstat, baseline$LRTstat)
+  expect_equal(supported_placeholder$p_LRT, baseline$p_LRT)
+  expect_equal(unsupported_placeholder$LRTstat, baseline$LRTstat)
+  expect_equal(unsupported_placeholder$p_LRT, baseline$p_LRT)
+})
+
 test_that("icci rejects invalid confidence levels before object inspection", {
   for (conf.level in list(NA_real_, NaN, Inf, 0, 1, c(0.9, 0.95), "0.95")) {
     err <- tryCatch(
