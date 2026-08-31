@@ -57,3 +57,37 @@ test_that("vuongtest sanitizes singular covariance errors", {
     )
   )
 })
+
+test_that("vuongtest rejects invalid control arguments before object inspection", {
+  invalid_cases <- list(
+    list(args = list(nested = NA), message = "Argument 'nested' must be a single logical value."),
+    list(args = list(nested = c(TRUE, FALSE)), message = "Argument 'nested' must be a single logical value."),
+    list(args = list(adj = NA_character_), message = "Argument 'adj' must be one of 'none', 'aic', or 'bic'."),
+    list(args = list(adj = "invalid"), message = "Argument 'adj' must be one of 'none', 'aic', or 'bic'.")
+  )
+
+  for (case in invalid_cases) {
+    err <- tryCatch(
+      do.call(vuongtest, c(list(object1 = NULL, object2 = NULL), case$args)),
+      error = identity
+    )
+    expect_s3_class(err, "error")
+    expect_identical(conditionMessage(err), case$message)
+    expect_null(conditionCall(err))
+  }
+})
+
+test_that("icci rejects invalid confidence levels before object inspection", {
+  for (conf.level in list(NA_real_, NaN, Inf, 0, 1, c(0.9, 0.95), "0.95")) {
+    err <- tryCatch(
+      icci(NULL, NULL, conf.level = conf.level),
+      error = identity
+    )
+    expect_s3_class(err, "error")
+    expect_identical(
+      conditionMessage(err),
+      "Argument 'conf.level' must be a single numeric value between 0 and 1."
+    )
+    expect_null(conditionCall(err))
+  }
+})
