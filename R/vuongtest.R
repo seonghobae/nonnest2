@@ -101,7 +101,7 @@ vuongtest <- function(object1, object2, nested=FALSE, adj="none", ll1=llcont, ll
   if (!is.logical(nested) || length(nested) != 1 || is.na(nested)) {
     stop("Argument 'nested' must be a single logical value.", call. = FALSE)
   }
-  if (!nested && (!is.character(adj) || length(adj) != 1 || is.na(adj) || !(adj %in% c("none", "aic", "bic")))) {
+  if (!is.character(adj) || length(adj) != 1 || is.na(adj) || !(adj %in% c("none", "aic", "bic"))) {
     stop("Argument 'adj' must be one of 'none', 'aic', or 'bic'.", call. = FALSE)
   }
 
@@ -147,29 +147,27 @@ vuongtest <- function(object1, object2, nested=FALSE, adj="none", ll1=llcont, ll
   ## Calculate likelihood ratio; Eq (6.4)
   lr <- sum(llA - llB, na.rm = TRUE)
 
-  ## Adjustments to likelihood ratio apply only to non-nested comparisons.
-  if(!nested){
-    if(classA %in% c("SingleGroupClass", "MultipleGroupClass", "DiscreteClass")){
-      nparA <- mirt::extract.mirt(object1, "nest")
-    } else if(classA == "lavaan"){
-      nparA <- attr(logLik(object1), "df")
-    } else {
-      nparA <- length(coef(object1))
-    }
-    if(classB %in% c("SingleGroupClass", "MultipleGroupClass", "DiscreteClass")){
-      nparB <- mirt::extract.mirt(object2, "nest")
-    } else if(classB == "lavaan"){
-      nparB <- attr(logLik(object2), "df")
-    } else {
-      nparB <- length(coef(object2))
-    }
+  ## Adjustments to likelihood ratio
+  if(classA %in% c("SingleGroupClass", "MultipleGroupClass", "DiscreteClass")){
+    nparA <- mirt::extract.mirt(object1, "nest")
+  } else if(classA == "lavaan"){
+    nparA <- attr(logLik(object1), "df")
+  } else {
+    nparA <- length(coef(object1))
+  }
+  if(classB %in% c("SingleGroupClass", "MultipleGroupClass", "DiscreteClass")){
+    nparB <- mirt::extract.mirt(object2, "nest")
+  } else if(classB == "lavaan"){
+    nparB <- attr(logLik(object2), "df")
+  } else {
+    nparB <- length(coef(object2))
+  }
 
-    if(adj=="aic"){
-      lr <- lr - (nparA - nparB)
-    }
-    if(adj=="bic"){
-      lr <- lr - (nparA - nparB) * log(n)/2
-    }
+  if(adj=="aic"){
+    lr <- lr - (nparA - nparB)
+  }
+  if(adj=="bic"){
+    lr <- lr - (nparA - nparB) * log(n)/2
   }
 
   teststat <- (1/sqrt(n)) * lr/sqrt(omega.hat.2)
