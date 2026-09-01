@@ -1,5 +1,7 @@
 # nonnest2
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/ContextualWisdomLab/nonnest2)
+
 nonnest2 provides functionality for comparing non-nested models' fit and distinguishability, relying on theory from Vuong (1989).  The authors acknowledge support from NSF grant SES-1061334.  The contents of this package are those of the authors and do not reflect the views of the National Science Foundation.
 
 The package is intended to work automatically for models of many classes, including `lavaan`, `mirt`, and `glm`. It can also be applied to models of new, unseen classes, so long as the user provides functions to compute the model's casewise log-likelihoods and casewise first derivatives. A notable example is the [*merDeriv* package](https://github.com/nctingwang/merDeriv), which provides those functions for many models estimated via *lme4*.
