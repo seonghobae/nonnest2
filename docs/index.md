@@ -16,7 +16,9 @@ The public API is intentionally small:
 
 ## Statistical boundary
 
-Compared models must refer to the same dependent variable(s), the same observations, and the same observation order. `nonnest2` does not currently verify row alignment. `llcont()` likelihood contributions, score contributions, and covariance inputs are separate statistical contracts and must remain aligned by observation and parameterization.
+Compared models must refer to the same dependent variable(s), the same observations, and the same observation order. `nonnest2` does not currently verify row alignment. `llcont()` likelihood contributions and score contributions therefore share the observation ordering, while `vc1` / `vc2` are parameter covariance matrices whose rows and columns must match the score parameter ordering consumed by `calcAB()`; they are not observation-level inputs.
+
+`icci()` is valid only for non-nested models that are distinguishable according to the `vuongtest()` variance/distinguishability test. Nested or indistinguishable pairs must not be interpreted through its intervals.
 
 These procedures compare fitted models under their assumptions. They do not establish causal validity, substitute for identification or data-quality checks, or turn information criteria into proof of scientific truth. Consequential analyses should preserve the exact package revision, fitted-model inputs, and software environment needed for reproduction.
 
