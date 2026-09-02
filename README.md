@@ -64,11 +64,9 @@ comparison <- vuongtest(fit1, fit2)
 comparison
 ```
 
-Interpret the distinguishability result before treating relative-fit evidence as meaningful. `icci()` is intended for **non-nested models that are distinguishable according to the `vuongtest()` variance/distinguishability test**. If the models are nested or indistinguishable, the intervals returned by `icci()` are not valid for their intended interpretation. Only after that condition is satisfied should you compute, for example:
+This particular Holzinger–Swineford pair is the package vignette's **indistinguishable-model** example, so it is useful for learning the first-stage variance/distinguishability test but it is **not** a valid `icci()` example. Interpret the distinguishability result before treating relative-fit evidence as meaningful.
 
-```r
-icci(fit1, fit2)
-```
+`icci()` is intended for **non-nested models that are distinguishable according to the `vuongtest()` variance/distinguishability test**. If models are nested or indistinguishable, the intervals returned by `icci()` are incorrect for their intended interpretation. Use `icci()` only after a comparison satisfies that gate; the vignette's Political Democracy example demonstrates a distinguishable non-nested pair.
 
 Use the inferential threshold and model assumptions appropriate to the analysis rather than treating a package default as a scientific decision rule.
 
@@ -77,10 +75,10 @@ Use the inferential threshold and model assumptions appropriate to the analysis 
 `nonnest2` keeps the public comparison layer small, but its adapter responsibilities are distinct:
 
 - `llcont(model)` returns a numeric vector of **casewise log-likelihood contributions** in observation order;
-- `vuongtest()` separately obtains casewise score contributions through `score1` / `score2` when supplied, or through the package's class-specific/default score path such as `sandwich::estfun()` or the supported `mirt` score path; and
-- `vc1` / `vc2` supply the parameter covariance matrices used with those scores to construct the Vuong comparison matrices.
+- `vuongtest()` separately obtains **casewise score contributions in the same observation order** through `score1` / `score2` when supplied, or through the package's class-specific/default score path such as `sandwich::estfun()` or the supported `mirt` score path; and
+- `vc1` / `vc2` supply **parameter covariance matrices whose row/column ordering must match the score parameter ordering used by `calcAB()`**; they are not observation-level arrays.
 
-A new model adapter must therefore preserve row alignment across its likelihood and score contributions and provide each statistical quantity through the correct interface; `llcont()` is not a combined likelihood-and-derivative return contract.
+A new model adapter must therefore preserve observation-row alignment between likelihood and score contributions, preserve parameter-order alignment between scores and covariance matrices, and provide each statistical quantity through the correct interface. `llcont()` is not a combined likelihood-and-derivative return contract.
 
 For the exact supported S3 methods, see [`NAMESPACE`](NAMESPACE). Package history is recorded in [`NEWS`](NEWS), and longer worked material lives under [`vignettes/`](vignettes/).
 
