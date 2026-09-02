@@ -1,5 +1,7 @@
 # nonnest2
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/ContextualWisdomLab/nonnest2)
+
 **Evidence-based comparison of nested and non-nested statistical models in R.**
 
 `nonnest2` helps analysts answer two questions that ordinary fit indices do not answer by themselves: whether two fitted models are empirically distinguishable, and which model is better supported when they are distinguishable. The package implements tests based on Vuong (1989) and also provides confidence intervals for differences in AIC and BIC.
