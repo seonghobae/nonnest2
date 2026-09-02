@@ -96,6 +96,8 @@ The software implements statistical procedures based on that theory; using the s
 
 Current package metadata declares version `0.5-9` dated 2026-03-31. Treat that as source/package metadata, not by itself as evidence of a particular published artifact, deployment, benchmark, or certification. For any consequential analysis, bind results to the exact package revision and preserve the fitted-model inputs and software environment needed to reproduce the comparison.
 
+Maintainers can track current scientific, integration, release, and licensing gaps in [`docs/product-technical-gap-baseline.md`](docs/product-technical-gap-baseline.md). That dated ledger is not a substitute for fresh exact-head CI/review evidence.
+
 ## Contributing
 
 Keep changes focused on the statistical contract and supported model adapters. New adapters should include realistic tests for casewise likelihood contributions, score/covariance integration, row alignment assumptions, and comparison behavior. Changes to numerical formulas, supported model semantics, or public return values should be documented and verified through the repository's ordinary R package checks.
