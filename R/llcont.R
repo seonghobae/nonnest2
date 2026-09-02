@@ -54,7 +54,7 @@ llcont.glm <- function(x, ...){
                ## Bolt: replaced apply(..., 1, sum) with optimized rowSums() for performance
                n <- rowSums(y)
                ## Bolt: replaced ifelse with vectorized subsetting for performance
-               y_tmp <- y[, 1]/n
+               y_tmp <- y[, 1] / n
                cond <- n == 0
                cond[is.na(cond)] <- FALSE
                y_tmp[cond] <- 0
@@ -64,7 +64,7 @@ llcont.glm <- function(x, ...){
              }
              m <- if (any(n > 1)) n else wt
              ## Bolt: replaced ifelse with vectorized subsetting for performance
-             wt_tmp <- wt/m
+             wt_tmp <- wt / m
              cond <- m <= 0
              cond[is.na(cond)] <- FALSE
              wt_tmp[cond] <- 0
