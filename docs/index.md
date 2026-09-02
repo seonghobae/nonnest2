@@ -6,15 +6,17 @@
 
 ## Start here
 
-The task-first [README](../README.md) covers installation, a worked example, supported model adapters, verification, statistical interpretation, and contribution guidance.
+The task-first [README](https://github.com/ContextualWisdomLab/nonnest2/blob/master/README.md) covers installation, a worked example, model-alignment requirements, supported adapter contracts, verification, statistical interpretation, and contribution guidance.
 
 The public API is intentionally small:
 
 - `vuongtest()` — distinguishability and relative-fit comparison;
-- `icci()` — interval estimates for information-criterion differences;
-- `llcont()` — model-specific casewise contribution adapter boundary.
+- `icci()` — information-criterion difference intervals for non-nested models that satisfy the distinguishability condition; and
+- `llcont()` — model-specific casewise log-likelihood contributions.
 
 ## Statistical boundary
+
+Compared models must refer to the same dependent variable(s), the same observations, and the same observation order. `nonnest2` does not currently verify row alignment. `llcont()` likelihood contributions, score contributions, and covariance inputs are separate statistical contracts and must remain aligned by observation and parameterization.
 
 These procedures compare fitted models under their assumptions. They do not establish causal validity, substitute for identification or data-quality checks, or turn information criteria into proof of scientific truth. Consequential analyses should preserve the exact package revision, fitted-model inputs, and software environment needed for reproduction.
 
@@ -33,11 +35,13 @@ Use current exact-head CI evidence when deciding whether a revision is fit for u
 
 The inherited package metadata declares `GPL-2 | GPL-3`. ContextualWisdomLab maintenance of this repository does not create a new permissive grant over upstream copyright. GPL permits commercial use under its terms, but GPL-family source is outside ContextualWisdomLab's normal inbound commercial baseline.
 
-See [commercial-license-boundary.md](commercial-license-boundary.md) for the recorded provenance, constraints, and closure paths. This site must not be read as approval for incorporation into a ContextualWisdomLab commercial product while that boundary remains unresolved.
+See [commercial-license-boundary.md](commercial-license-boundary.md) for the recorded immutable provenance, constraints, and closure paths. This documentation source must not be read as approval for incorporation into a ContextualWisdomLab commercial product while that boundary remains unresolved.
 
 ## More documentation
 
-- [README](../README.md) — product overview, usage, adapters, and interpretation
+- [README](https://github.com/ContextualWisdomLab/nonnest2/blob/master/README.md) — product overview, usage, adapters, and interpretation
 - [Commercial license boundary](commercial-license-boundary.md) — provenance and policy status
-- [Vignettes](../vignettes/) — longer worked material in the source tree
+- [Vignettes](https://github.com/ContextualWisdomLab/nonnest2/tree/master/vignettes) — longer worked material in the source tree
 - [Ask DeepWiki](https://deepwiki.com/ContextualWisdomLab/nonnest2) — repository-aware navigation and questions
+
+This file is only a publication-ready documentation source. It does not itself establish GitHub Pages publication or a released package artifact.
