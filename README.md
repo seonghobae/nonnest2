@@ -10,16 +10,16 @@ The package works with several established R model classes and exposes a small a
 
 ## When to use it
 
-Use `nonnest2` when you have two fitted models for the same observations and need a casewise-likelihood comparison rather than a simple comparison of aggregate fit statistics.
+Use `nonnest2` when you have two fitted models whose casewise quantities refer to the **same dependent variable(s), the same observations, and the same observation row order**. For `lavaan` objects, the modeled variables must likewise correspond. The package does not currently verify row alignment for you, so a reordered or mismatched analysis sample can produce a numerically valid-looking but scientifically invalid comparison.
 
 Typical jobs include:
 
 - testing whether two models are distinguishable from the observed data;
 - comparing relative model fit using Vuong-style tests;
 - obtaining interval estimates for differences in AIC and BIC; and
-- extending the comparison machinery to another model class that can provide the required casewise contributions.
+- extending the comparison machinery to another model class that can provide the required casewise quantities.
 
-Built-in `llcont()` methods currently cover model classes from ecosystems including `lavaan`, `mirt`, `OpenMx`, base/generalized linear models, and several other regression-model families. The exact exported API is `vuongtest()`, `icci()`, and `llcont()`.
+Built-in `llcont()` methods currently cover model classes from ecosystems including `lavaan`, `mirt`, `OpenMx`, base/generalized linear models, and several other regression-model families. The exact exported public API is `vuongtest()`, `icci()`, and `llcont()`.
 
 ## Install from this source tree
 
@@ -40,7 +40,7 @@ The repository also contains an `R-CMD-check` GitHub Actions workflow. Its curre
 
 ## Quick start
 
-The example below compares two factor models that are not nested because the indicator assignments differ.
+The example below compares two factor models that are non-nested because the indicator assignments differ. Fit both models to the same rows in the same order.
 
 ```r
 library(lavaan)
@@ -60,15 +60,27 @@ m2 <- '
 '
 fit2 <- cfa(m2, data = HolzingerSwineford1939)
 
-vuongtest(fit1, fit2)
+comparison <- vuongtest(fit1, fit2)
+comparison
+```
+
+Interpret the distinguishability result before treating relative-fit evidence as meaningful. `icci()` is intended for **non-nested models that are distinguishable according to the `vuongtest()` variance/distinguishability test**. If the models are nested or indistinguishable, the intervals returned by `icci()` are not valid for their intended interpretation. Only after that condition is satisfied should you compute, for example:
+
+```r
 icci(fit1, fit2)
 ```
 
-Interpret the distinguishability result before treating a relative-fit result as meaningful, and interpret both in the context of the models' assumptions and the scientific question.
+Use the inferential threshold and model assumptions appropriate to the analysis rather than treating a package default as a scientific decision rule.
 
 ## Integration model
 
-`nonnest2` keeps the public comparison layer small. Model-specific integration happens through casewise likelihood/derivative contributions exposed by `llcont()` methods. New model classes should provide the statistical quantities expected by that adapter contract rather than embedding package-specific branching into `vuongtest()` itself.
+`nonnest2` keeps the public comparison layer small, but its adapter responsibilities are distinct:
+
+- `llcont(model)` returns a numeric vector of **casewise log-likelihood contributions** in observation order;
+- `vuongtest()` separately obtains casewise score contributions through `score1` / `score2` when supplied, or through the package's class-specific/default score path such as `sandwich::estfun()` or the supported `mirt` score path; and
+- `vc1` / `vc2` supply the parameter covariance matrices used with those scores to construct the Vuong comparison matrices.
+
+A new model adapter must therefore preserve row alignment across its likelihood and score contributions and provide each statistical quantity through the correct interface; `llcont()` is not a combined likelihood-and-derivative return contract.
 
 For the exact supported S3 methods, see [`NAMESPACE`](NAMESPACE). Package history is recorded in [`NEWS`](NEWS), and longer worked material lives under [`vignettes/`](vignettes/).
 
@@ -78,7 +90,7 @@ The package metadata cites:
 
 > Vuong, Q. H. (1989). Likelihood ratio tests for model selection and non-nested hypotheses. *Econometrica, 57*(2), 307–333. https://doi.org/10.2307/1912557
 
-The software implements statistical procedures based on that theory; using the software does not remove the need to check identification, estimator assumptions, data quality, model misspecification, and the substantive meaning of the compared models.
+The software implements statistical procedures based on that theory; using the software does not remove the need to check identification, estimator assumptions, data quality, model misspecification, observation alignment, and the substantive meaning of the compared models.
 
 ## Project status and verification
 
@@ -86,7 +98,7 @@ Current package metadata declares version `0.5-9` dated 2026-03-31. Treat that a
 
 ## Contributing
 
-Keep changes focused on the statistical contract and supported model adapters. New adapters should include realistic tests for casewise contributions and comparison behavior. Changes to numerical formulas, supported model semantics, or public return values should be documented and verified through the repository's ordinary R package checks.
+Keep changes focused on the statistical contract and supported model adapters. New adapters should include realistic tests for casewise likelihood contributions, score/covariance integration, row alignment assumptions, and comparison behavior. Changes to numerical formulas, supported model semantics, or public return values should be documented and verified through the repository's ordinary R package checks.
 
 ## License and commercial-use boundary
 
