@@ -40,6 +40,7 @@ See [commercial-license-boundary.md](commercial-license-boundary.md) for the rec
 ## More documentation
 
 - [README](https://github.com/ContextualWisdomLab/nonnest2/blob/master/README.md) — product overview, usage, adapters, and interpretation
+- [Product and technical gap baseline](product-technical-gap-baseline.md) — current scientific, integration, release, and licensing gaps
 - [Commercial license boundary](commercial-license-boundary.md) — provenance and policy status
 - [Vignettes](https://github.com/ContextualWisdomLab/nonnest2/tree/master/vignettes) — longer worked material in the source tree
 - [Ask DeepWiki](https://deepwiki.com/ContextualWisdomLab/nonnest2) — repository-aware navigation and questions
