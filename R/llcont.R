@@ -54,14 +54,18 @@ llcont.glm <- function(x, ...){
                ## Bolt: replaced apply(..., 1, sum) with optimized rowSums() for performance
                n <- rowSums(y)
                ## Bolt: replaced ifelse with vectorized subsetting for performance
-               y <- y[, 1]/n
+               ## ifelse() loses attributes, so unname is required for exact equivalence
+               y <- unname(y[, 1]/n)
                y[n == 0] <- 0
              } else {
                n <- rep.int(1, length(y))
              }
              m <- if (any(n > 1)) n else wt
              ## Bolt: replaced ifelse with vectorized subsetting for performance
-             res_wt <- wt/m
+             ## ifelse() implicitly unnames objects. Also scalar recycling must be properly handled.
+             if (length(wt) == 1 && length(m) > 1) wt <- rep(wt, length(m))
+             if (length(wt) == 1 && length(m) > 1) wt <- rep(wt, length(m))
+             res_wt <- unname(wt/m)
              res_wt[m <= 0] <- 0
              wt <- res_wt
              dbinom(round(m * y), round(m), mpreds, log = TRUE) * wt
