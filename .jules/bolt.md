@@ -15,3 +15,6 @@
 ## 2024-05-15 - [R Performance: ifelse Overhead]
 **Learning:** In R, ifelse evaluates both true and false branches entirely before subsetting, which is very inefficient for vector operations.
 **Action:** Optimize this by preallocating with res <- Y * 0 to preserve attributes and using vectorized subsetting like if any cond res subset <- ...
+## 2024-05-18 - Vectorized subsetting over ifelse
+**Learning:** In R codebases, using vectorized subsetting (`res <- a/b; res[b == 0] <- 0`) is significantly faster and more memory-efficient than `ifelse(b == 0, 0, a/b)`. It avoids function overhead and multiple vector evaluations.
+**Action:** Replace `ifelse()` with vectorized subsetting and proper handling of scalar recycling where feasible for performance. Avoid using `which()` to retain NAs if required.
