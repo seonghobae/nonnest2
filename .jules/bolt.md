@@ -15,6 +15,3 @@
 ## 2024-05-15 - [R Performance: ifelse Overhead]
 **Learning:** In R, ifelse evaluates both true and false branches entirely before subsetting, which is very inefficient for vector operations.
 **Action:** Optimize this by preallocating with res <- Y * 0 to preserve attributes and using vectorized subsetting like if any cond res subset <- ...
-## 2026-08-11 - Safely Replacing ifelse in R
-**Learning:** `ifelse` in R is slow due to evaluating both branches and attribute preservation overhead. It can be safely replaced by mathematical vectorized subset assignment (e.g., `y[n == 0] <- 0`), but NAs in indices can cause fatal subscript errors. In cases where indices are guaranteed to be NA-free (e.g. processing data from a fitted `glm` object that drops NAs), this optimization is very safe and yields ~22% speedup.
-**Action:** When replacing `ifelse` with subset assignment, always verify whether NAs are possible in the conditional vector. If so, sanitize them (`cond[is.na(cond)] <- FALSE`). If guaranteed NA-free, direct subsetting is optimal. Remember to add comments explaining the optimization.
