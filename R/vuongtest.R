@@ -98,6 +98,22 @@
 #' @export
 vuongtest <- function(object1, object2, nested=FALSE, adj="none", ll1=llcont, ll2=llcont, score1=NULL, score2=NULL, vc1=vcov, vc2=vcov) {
 
+  if (length(nested) != 1 || is.na(nested) || !is.logical(nested)) {
+    stop("nested must be a single logical value", call. = FALSE)
+  }
+  if (length(adj) != 1 || is.na(adj) || !is.character(adj) || !(adj %in% c("none", "aic", "bic"))) {
+    stop('adj must be one of "none", "aic", or "bic"', call. = FALSE)
+  }
+  if (!is.function(ll1) || !is.function(ll2)) {
+    stop("ll1 and ll2 must be functions", call. = FALSE)
+  }
+  if ((!is.null(score1) && !is.function(score1)) || (!is.null(score2) && !is.function(score2))) {
+    stop("score1 and score2 must be functions or NULL", call. = FALSE)
+  }
+  if (!is.function(vc1) || !is.function(vc2)) {
+    stop("vc1 and vc2 must be functions", call. = FALSE)
+  }
+
   ## check objects, issue warnings/errors, get classes/calls
   obinfo <- check.obj(object1, object2)
   callA <- obinfo$callA; classA <- obinfo$classA
