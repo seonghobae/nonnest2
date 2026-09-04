@@ -15,3 +15,6 @@
 ## 2024-05-15 - [R Performance: ifelse Overhead]
 **Learning:** In R, ifelse evaluates both true and false branches entirely before subsetting, which is very inefficient for vector operations.
 **Action:** Optimize this by preallocating with res <- Y * 0 to preserve attributes and using vectorized subsetting like if any cond res subset <- ...
+## 2024-09-04 - R Model Residual Extraction
+**Learning:** In R codebases, the residuals extracted from `nls` models via `x$m$resid()` are already internally weighted by `sqrt(weights)`. This is a critical distinction from `lm` models where `x$residuals` returns unweighted residuals.
+**Action:** When manually calculating variance or sums of squares for `nls` residuals, never apply weights a second time. `sum(res^2)` correctly computes the weighted sum of squared residuals for `nls` objects, while for `lm` objects you must compute `sum(weights * res^2)`.
