@@ -314,13 +314,11 @@ llcont.lm <- function (x, ...) {
   if (inherits(x, "mlm"))
     stop("'logLik' does not support multiple responses", call. = FALSE)
   res <- x$residuals
-  p <- x$rank
   N <- length(res)
-  s <- summary(x)$sigma
-  ## calculate s2 for ML method
-  sml2 <- (s * sqrt((N - p) / N))^2
+  ## Bolt: bypassed summary(x)$sigma overhead by computing sml2 directly from residuals and weights
   if (is.null(w <- x$weights)) {
     w <- rep.int(1, N)
+    sml2 <- sum(res^2) / N
   } else {
     excl <- w == 0
     if (any(excl)) {
@@ -328,6 +326,7 @@ llcont.lm <- function (x, ...) {
       N <- length(res)
       w <- w[!excl]
     }
+    sml2 <- sum(w * res^2) / N
   }
 
   0.5 * (log(w) - (log(2 * pi) + log(sml2) + (w * res^2)/sml2))
@@ -345,15 +344,18 @@ llcont.mlogit <- function(x, ...) log(fitted(x))
 #' @export
 llcont.nls <- function (x, ...) {
   res <- x$m$resid()
-  N <- length(res)
-  s <- summary(x)$sigma
-  N_p <- summary(x)$df[2]
-  sml2 <- (s * sqrt((N_p) / N))^2
   if (is.null(w <- x$weights))
-    w <- rep_len(1, N)
+    w <- rep_len(1, length(res))
   zw <- w == 0
+  N <- sum(!zw)
 
-  -0.5 * (log(2 * pi) + log(sml2) - log(w + zw) + (w * res^2)/sml2)
+  ## Bolt: bypassed summary(x)$sigma overhead by computing sml2 directly from residuals
+  ## Note: nls residuals (x$m$resid()) are already weighted internally by sqrt(weights)
+  sml2 <- sum(res^2) / N
+
+  ll <- numeric(length(res))
+  ll[!zw] <- -0.5 * (log(2 * pi) + log(sml2) - log(w[!zw]) + (res[!zw]^2)/sml2)
+  ll
 }
 
 ################################################################
