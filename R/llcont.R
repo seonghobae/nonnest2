@@ -344,15 +344,18 @@ llcont.mlogit <- function(x, ...) log(fitted(x))
 #' @export
 llcont.nls <- function (x, ...) {
   res <- x$m$resid()
-  N <- length(res)
+  if (is.null(w <- x$weights))
+    w <- rep_len(1, length(res))
+  zw <- w == 0
+  N <- sum(!zw)
+
   ## Bolt: bypassed summary(x)$sigma overhead by computing sml2 directly from residuals
   ## Note: nls residuals (x$m$resid()) are already weighted internally by sqrt(weights)
   sml2 <- sum(res^2) / N
-  if (is.null(w <- x$weights))
-    w <- rep_len(1, N)
-  zw <- w == 0
 
-  -0.5 * (log(2 * pi) + log(sml2) - log(w + zw) + (w * res^2)/sml2)
+  ll <- numeric(length(res))
+  ll[!zw] <- -0.5 * (log(2 * pi) + log(sml2) - log(w[!zw]) + (res[!zw]^2)/sml2)
+  ll
 }
 
 ################################################################
