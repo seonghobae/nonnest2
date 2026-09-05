@@ -53,12 +53,28 @@ llcont.glm <- function(x, ...){
              if(is.matrix(y)) {
                ## Bolt: replaced apply(..., 1, sum) with optimized rowSums() for performance
                n <- rowSums(y)
-               y <- ifelse(n == 0, 0, y[, 1]/n)
+               ## Compute grouped response ratios only where the trial count is nonzero.
+               y_opt <- y[, 1] * 0
+               cond_y <- n != 0
+               cond_y[is.na(cond_y)] <- FALSE
+               if (any(cond_y)) {
+                 y_opt[cond_y] <- y[cond_y, 1] / n[cond_y]
+               }
+               y <- y_opt
              } else {
                n <- rep.int(1, length(y))
              }
              m <- if (any(n > 1)) n else wt
-             wt <- ifelse(m > 0, (wt/m), 0)
+             ## Allocate over the row domain so scalar prior weights cannot truncate the result.
+             wt_opt <- rep_len(wt * 0, length(m))
+             cond_wt <- m > 0
+             cond_wt[is.na(cond_wt)] <- FALSE
+             if (any(cond_wt)) {
+               wt_c <- if (length(wt) == 1) rep_len(wt, sum(cond_wt)) else wt[cond_wt]
+               m_c <- if (length(m) == 1) rep_len(m, sum(cond_wt)) else m[cond_wt]
+               wt_opt[cond_wt] <- wt_c / m_c
+             }
+             wt <- wt_opt
              dbinom(round(m * y), round(m), mpreds, log = TRUE) * wt
            },
            quasibinomial = {
@@ -600,4 +616,3 @@ llcont.MxModel <- function(x, ...){
 
   return(lls)
 }
-
