@@ -14,6 +14,7 @@ test_that("unweighted polr contributions retain one value per fitted row", {
   contributions <- llcont(fit)
 
   expect_length(contributions, nrow(fit$fitted.values))
+  expect_equal(names(contributions), rownames(fit$fitted.values))
   expect_equal(sum(contributions), as.numeric(logLik(fit)))
 })
 
