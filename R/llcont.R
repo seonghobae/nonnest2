@@ -363,12 +363,14 @@ llcont.nls <- function (x, ...) {
 llcont.polr <- function(x, ...) {
   m <- x$model
   y <- unclass(model.response(m))
-  wherey <- matrix(c(as.numeric(names(y)), y), ncol=2)
-  idx <- matrix(0, nrow=length(y), ncol=length(x$lev))
-  idx[wherey] <- 1
+  wherey <- cbind(seq_along(y), as.numeric(y))
 
-  ## Bolt: replaced apply(..., 1, sum) with optimized rowSums() for performance
-  model.weights(m) * log(rowSums(idx * x$fitted.values))
+  ## Bolt: replaced matrix creation and rowSums with direct matrix subsetting for performance
+  w <- model.weights(m)
+  res <- if (is.null(w)) log(x$fitted.values[wherey]) else w * log(x$fitted.values[wherey])
+  names(res) <- rownames(x$fitted.values)
+  if (is.null(names(res))) names(res) <- names(y)
+  res
 }
 
 ################################################################
