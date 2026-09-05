@@ -2,6 +2,8 @@ Changes in Version 0.5-9
 
     o bug fixes: lavaan parameter counts with equality constraints, mirt DiscreteClass (credit to Seongho Bae)
 
+    o llcont.polr now extracts each observation's fitted category probability directly and handles models without explicit case weights
+
 Changes in Version 0.5-8
 
     o add support for objects of DiscreteClass from mirt package (credit to Phil Chalmers)
@@ -76,8 +78,8 @@ Changes in Version 0.2
       to specify whether or not candidate models are nested.  This
       impacts the limiting distribution of the Vuong LRT.
 
-    o Added argument "adj" to vuongtest(), allowing the user
-      to obtain test statistics with AIC or BIC adjustments.
+    o Added argument "adj" to vuongtest(), allowing the user to
+      obtain test statistics with AIC or BIC adjustments.
 
     o print methods no longer display the full call of each model
       (just the first line).
