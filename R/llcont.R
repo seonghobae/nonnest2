@@ -53,7 +53,7 @@ llcont.glm <- function(x, ...){
              if(is.matrix(y)) {
                ## Bolt: replaced apply(..., 1, sum) with optimized rowSums() for performance
                n <- rowSums(y)
-               ## Bolt: replaced ifelse with preallocation and vectorized subsetting for performance
+               ## Compute grouped response ratios only where the trial count is nonzero.
                y_opt <- y[, 1] * 0
                cond_y <- n != 0
                cond_y[is.na(cond_y)] <- FALSE
@@ -65,8 +65,8 @@ llcont.glm <- function(x, ...){
                n <- rep.int(1, length(y))
              }
              m <- if (any(n > 1)) n else wt
-             ## Bolt: replaced ifelse with preallocation and vectorized subsetting for performance
-             wt_opt <- wt * 0
+             ## Allocate over the row domain so scalar prior weights cannot truncate the result.
+             wt_opt <- rep_len(wt * 0, length(m))
              cond_wt <- m > 0
              cond_wt[is.na(cond_wt)] <- FALSE
              if (any(cond_wt)) {
@@ -616,4 +616,3 @@ llcont.MxModel <- function(x, ...){
 
   return(lls)
 }
-
