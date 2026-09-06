@@ -364,7 +364,7 @@ llcont.polr <- function(x, ...) {
   m <- x$model
   y <- unclass(model.response(m))
   ## Bolt: Replaced one-hot encoded matrix allocation and rowSums multiplication
-  ## with direct two-dimensional matrix subsetting for O(1) space and faster computation.
+  ## with direct two-dimensional matrix subsetting for faster computation.
   model.weights(m) * log(x$fitted.values[cbind(seq_along(y), y)])
 }
 
