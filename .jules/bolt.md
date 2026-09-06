@@ -15,8 +15,3 @@
 ## 2024-05-15 - [R Performance: ifelse Overhead]
 **Learning:** In R, ifelse evaluates both true and false branches entirely before subsetting, which is very inefficient for vector operations.
 **Action:** Optimize this by preallocating with res <- Y * 0 to preserve attributes and using vectorized subsetting like if any cond res subset <- ...
-
-
-## 2024-09-06 - Preallocation length in vectorized ifelse
-**Learning:** When refactoring `ifelse(cond, yes, no)` into vectorized subsetting, preallocating with `res <- yes * 0` will cause length mismatches (and subsequent NA padding) if `yes` is a scalar but `cond` is a longer vector.
-**Action:** Always preallocate using a variable that matches the length of the condition vector (e.g., `res <- cond * 0` or `res <- m * 0`) to ensure the resulting vector is appropriately sized.

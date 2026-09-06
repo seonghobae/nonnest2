@@ -53,28 +53,12 @@ llcont.glm <- function(x, ...){
              if(is.matrix(y)) {
                ## Bolt: replaced apply(..., 1, sum) with optimized rowSums() for performance
                n <- rowSums(y)
-               ## Bolt: replaced ifelse with preallocation and vectorized subsetting for performance
-               res_y <- y[, 1] * 0
-               cond_y <- n != 0
-               cond_y[is.na(cond_y)] <- FALSE
-               if (any(cond_y)) res_y[cond_y] <- y[cond_y, 1] / n[cond_y]
-               y <- res_y
+               y <- ifelse(n == 0, 0, y[, 1]/n)
              } else {
                n <- rep.int(1, length(y))
              }
              m <- if (any(n > 1)) n else wt
-             ## Bolt: replaced ifelse with preallocation and vectorized subsetting for performance
-             res_wt <- m * 0
-             cond_wt <- m > 0
-             cond_wt[is.na(cond_wt)] <- FALSE
-             if (any(cond_wt)) {
-               if (length(wt) == 1 && length(m) > 1) {
-                 res_wt[cond_wt] <- rep(wt, length(m))[cond_wt] / m[cond_wt]
-               } else {
-                 res_wt[cond_wt] <- wt[cond_wt] / m[cond_wt]
-               }
-             }
-             wt <- res_wt
+             wt <- ifelse(m > 0, (wt/m), 0)
              dbinom(round(m * y), round(m), mpreds, log = TRUE) * wt
            },
            quasibinomial = {
@@ -423,7 +407,8 @@ llcont.lavaan <- function(x, ...){
   if(tolower(lavInspect(x, "options")$missing) == "ml.x") stop("cannot handle lavaan models with missing='ml.x'. consider using missing='ml'.", call. = FALSE)
   mispatts <- lavInspect(x, "patterns")
   if(any(class(mispatts) == "list")){
-    npatts <- max(sapply(mispatts, nrow))
+    ## Bolt: replaced sapply with vapply for performance
+    npatts <- max(vapply(mispatts, nrow, numeric(1)))
   } else {
     npatts <- nrow(mispatts)
   }
