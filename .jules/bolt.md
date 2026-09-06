@@ -16,6 +16,7 @@
 **Learning:** In R, ifelse evaluates both true and false branches entirely before subsetting, which is very inefficient for vector operations.
 **Action:** Optimize this by preallocating with res <- Y * 0 to preserve attributes and using vectorized subsetting like if any cond res subset <- ...
 
-## 2024-08-17 - Optimize sapply overhead with vapply in R
-**Learning:** Using `sapply` over a list involves significant overhead to deduce and simplify the return type.
-**Action:** When the return type and length are known, prefer `vapply(..., FUN.VALUE = type)` over `sapply(...)` for better performance and safety.
+
+## 2024-09-06 - Preallocation length in vectorized ifelse
+**Learning:** When refactoring `ifelse(cond, yes, no)` into vectorized subsetting, preallocating with `res <- yes * 0` will cause length mismatches (and subsequent NA padding) if `yes` is a scalar but `cond` is a longer vector.
+**Action:** Always preallocate using a variable that matches the length of the condition vector (e.g., `res <- cond * 0` or `res <- m * 0`) to ensure the resulting vector is appropriately sized.
