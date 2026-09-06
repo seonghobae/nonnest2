@@ -363,8 +363,7 @@ llcont.nls <- function (x, ...) {
 llcont.polr <- function(x, ...) {
   m <- x$model
   y <- unclass(model.response(m))
-  ## Bolt: Replaced one-hot encoded matrix allocation and rowSums multiplication
-  ## with direct two-dimensional matrix subsetting for faster computation.
+  ## Index fitted probabilities by model row position; row names are labels, not positional authority.
   model.weights(m) * log(x$fitted.values[cbind(seq_along(y), y)])
 }
 
