@@ -142,8 +142,8 @@ print.icci <- function(x, ...) {
   ## a char vector with each element of length 'width.cutoff'
   model2call <- deparse(x$call$call2)
   cat(" Call: ", model2call[1], if (length(model2call) > 1) "...\n" else "\n", sep="")
-  cat(" AIC:", formatC(x$AIC$AIC1, digits=3L, format="f"), "\n")
-  cat(" BIC:", formatC(x$BIC$BIC1, digits=3L, format="f"), "\n\n")
+  cat(" AIC:", formatC(x$AIC$AIC2, digits=3L, format="f"), "\n")
+  cat(" BIC:", formatC(x$BIC$BIC2, digits=3L, format="f"), "\n\n")
 
   cat(x$confLevel * 100,
       "% Confidence Interval of AIC difference (AICdiff = AIC1 - AIC2) \n", sep="")
