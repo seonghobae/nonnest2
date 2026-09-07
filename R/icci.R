@@ -65,9 +65,12 @@
 #' @export
 icci <- function(object1, object2, conf.level=.95, ll1=llcont, ll2=llcont) {
 
-  ## Security validation for inputs
+  ## Public argument validation
   if (length(conf.level) != 1 || !is.numeric(conf.level) || is.na(conf.level) || conf.level <= 0 || conf.level >= 1) {
     stop("Argument 'conf.level' must be a single numeric value between 0 and 1.", call. = FALSE)
+  }
+  if (!is.function(ll1) || !is.function(ll2)) {
+    stop("Arguments 'll1' and 'll2' must be functions.", call. = FALSE)
   }
 
   ## check objects, issue warnings/errors, get classes/calls
@@ -139,8 +142,8 @@ print.icci <- function(x, ...) {
   ## a char vector with each element of length 'width.cutoff'
   model2call <- deparse(x$call$call2)
   cat(" Call: ", model2call[1], if (length(model2call) > 1) "...\n" else "\n", sep="")
-  cat(" AIC:", formatC(x$AIC$AIC2, digits=3L, format="f"), "\n")
-  cat(" BIC:", formatC(x$BIC$BIC2, digits=3L, format="f"), "\n\n")
+  cat(" AIC:", formatC(x$AIC$AIC1, digits=3L, format="f"), "\n")
+  cat(" BIC:", formatC(x$BIC$BIC1, digits=3L, format="f"), "\n\n")
 
   cat(x$confLevel * 100,
       "% Confidence Interval of AIC difference (AICdiff = AIC1 - AIC2) \n", sep="")
