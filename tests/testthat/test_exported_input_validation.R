@@ -32,3 +32,51 @@ test_that("icci validates confidence levels at the exported boundary", {
     )
   }
 })
+
+test_that("exported likelihood callbacks must be functions", {
+  callback_message <- "Arguments 'll1' and 'll2' must be functions."
+  for (value in list(NULL, "llcont", 1, TRUE, list())) {
+    expect_exported_boundary_error(
+      vuongtest(NULL, NULL, ll1 = value),
+      callback_message
+    )
+    expect_exported_boundary_error(
+      vuongtest(NULL, NULL, ll2 = value),
+      callback_message
+    )
+    expect_exported_boundary_error(
+      icci(NULL, NULL, ll1 = value),
+      callback_message
+    )
+    expect_exported_boundary_error(
+      icci(NULL, NULL, ll2 = value),
+      callback_message
+    )
+  }
+})
+
+test_that("vuongtest validates optional score and covariance callbacks", {
+  score_message <- "Arguments 'score1' and 'score2' must be functions or NULL."
+  for (value in list("score", 1, TRUE, list())) {
+    expect_exported_boundary_error(
+      vuongtest(NULL, NULL, score1 = value),
+      score_message
+    )
+    expect_exported_boundary_error(
+      vuongtest(NULL, NULL, score2 = value),
+      score_message
+    )
+  }
+
+  vc_message <- "Arguments 'vc1' and 'vc2' must be functions."
+  for (value in list(NULL, "vcov", 1, TRUE, list())) {
+    expect_exported_boundary_error(
+      vuongtest(NULL, NULL, vc1 = value),
+      vc_message
+    )
+    expect_exported_boundary_error(
+      vuongtest(NULL, NULL, vc2 = value),
+      vc_message
+    )
+  }
+})
