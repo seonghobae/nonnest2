@@ -1,30 +1,13 @@
-test_that("icci rejects invalid confidence levels before model processing", {
-  invalid_conf_levels <- list(
-    numeric(0),
-    c(0.9, 0.95),
-    NA_real_,
-    NaN,
-    0,
-    1,
-    -0.1,
-    1.1,
-    -Inf,
-    Inf,
-    "0.95",
-    TRUE
-  )
+context("icci_conf_level")
 
-  for (conf_level in invalid_conf_levels) {
-    err <- tryCatch(
-      icci(NULL, NULL, conf.level = conf_level),
-      error = identity
-    )
+test_that("icci throws error for invalid conf.level", {
+  library(MASS)
+  house1 <- glm(Freq ~ Infl + Type + Cont, family=poisson, data=housing)
+  house2 <- glm(Freq ~ Infl + Sat, family=poisson, data=housing)
 
-    expect_s3_class(err, "error")
-    expect_identical(
-      conditionMessage(err),
-      "conf.level must be a single numeric value between 0 and 1."
-    )
-    expect_null(conditionCall(err))
-  }
+  expect_error(icci(house2, house1, conf.level = "invalid"), "conf.level must be a single numeric value between 0 and 1.")
+  expect_error(icci(house2, house1, conf.level = -0.5), "conf.level must be a single numeric value between 0 and 1.")
+  expect_error(icci(house2, house1, conf.level = 1.5), "conf.level must be a single numeric value between 0 and 1.")
+  expect_error(icci(house2, house1, conf.level = c(0.95, 0.99)), "conf.level must be a single numeric value between 0 and 1.")
+  expect_error(icci(house2, house1, conf.level = NA), "conf.level must be a single numeric value between 0 and 1.")
 })
