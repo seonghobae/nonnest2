@@ -98,12 +98,21 @@
 #' @export
 vuongtest <- function(object1, object2, nested=FALSE, adj="none", ll1=llcont, ll2=llcont, score1=NULL, score2=NULL, vc1=vcov, vc2=vcov) {
 
-  ## Security validation for inputs
+  ## Public argument validation
   if (length(nested) != 1 || !is.logical(nested) || is.na(nested)) {
     stop("Argument 'nested' must be a single logical value (TRUE/FALSE).", call. = FALSE)
   }
   if (length(adj) != 1 || !is.character(adj) || is.na(adj) || !(adj %in% c("none", "aic", "bic"))) {
     stop("Argument 'adj' must be a single character string ('none', 'aic', or 'bic').", call. = FALSE)
+  }
+  if (!is.function(ll1) || !is.function(ll2)) {
+    stop("Arguments 'll1' and 'll2' must be functions.", call. = FALSE)
+  }
+  if ((!is.null(score1) && !is.function(score1)) || (!is.null(score2) && !is.function(score2))) {
+    stop("Arguments 'score1' and 'score2' must be functions or NULL.", call. = FALSE)
+  }
+  if (!is.function(vc1) || !is.function(vc2)) {
+    stop("Arguments 'vc1' and 'vc2' must be functions.", call. = FALSE)
   }
 
   ## check objects, issue warnings/errors, get classes/calls
@@ -285,6 +294,7 @@ calcAB <- function(object, n, scfun, vc){
     sc <- estfun(object)
   }
   sc.cp <- crossprod(sc)/n
+
   B <- matrix(sc.cp, nrow(A), nrow(A))
 
   list(A=A, B=B, sc=sc)
