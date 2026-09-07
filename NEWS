@@ -2,6 +2,9 @@ Changes in Version 0.5-9
 
     o bug fixes: lavaan parameter counts with equality constraints, mirt DiscreteClass (credit to Seongho Bae)
 
+    o validate public vuongtest() and icci() option and callback arguments before
+      model evaluation, with stable errors for malformed inputs
+
 Changes in Version 0.5-8
 
     o add support for objects of DiscreteClass from mirt package (credit to Phil Chalmers)
